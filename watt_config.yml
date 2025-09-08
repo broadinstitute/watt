@@ -46,3 +46,16 @@ bad_workflow:
     bad_workflow:
       test_inputs: "/tests/bad_workflow/test_inputs.json"
       expected_outputs: "/tests/bad_workflow/expected_outputs.json"
+
+get_pdf:
+  path: "/workflows/get_pdf.wdl"
+  tests:
+    pdfs_match:
+      test_inputs: "/tests/get_pdf/pdfs_match/test_inputs.json"
+      expected_outputs: "/tests/get_pdf/pdfs_match/expected_outputs.json"
+    text_mismatches:
+      test_inputs: "/tests/get_pdf/text_mismatches/test_inputs.json"
+      expected_outputs: "/tests/get_pdf/text_mismatches/expected_outputs.json"
+    figure_mismatches:
+      test_inputs: "/tests/get_pdf/figure_mismatches/test_inputs.json"
+      expected_outputs: "/tests/get_pdf/figure_mismatches/expected_outputs.json"
