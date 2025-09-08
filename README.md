@@ -30,6 +30,9 @@ python -m venv venv
 source venv/bin/activate
 pip install -r test_requirements.txt
 ```
+Note that testing pdf outputs uses [pdf2image](https://pypi.org/project/pdf2image/) which requires you to have [poppler](https://poppler.freedesktop.org/) installed on your system. 
+On Ubuntu, you can run `sudo apt-get install poppler-utils` to install `poppler`. On MacOS, you can use `brew install poppler`.  If you are not
+testing any pdf outputs, `poppler` is not required, and you do not need to install it.
 5. Run using `python watt.py [ARGS]` with possible options described below.
 
 ## The Test Configuration File
