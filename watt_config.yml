@@ -53,6 +53,9 @@ get_pdf:
     pdfs_match:
       test_inputs: "/tests/get_pdf/pdfs_match/test_inputs.json"
       expected_outputs: "/tests/get_pdf/pdfs_match/expected_outputs.json"
+    pdfs_match_without_extension:
+        test_inputs: "/tests/get_pdf/pdfs_match_without_pdf_extension/test_inputs.json"
+        expected_outputs: "/tests/get_pdf/pdfs_match_without_pdf_extension/expected_outputs.json"
     text_mismatches:
       test_inputs: "/tests/get_pdf/text_mismatches/test_inputs.json"
       expected_outputs: "/tests/get_pdf/text_mismatches/expected_outputs.json"
