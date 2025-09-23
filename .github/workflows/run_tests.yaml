@@ -6,10 +6,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install requirements
         run: |
+          sudo apt-get install poppler-utils
           pip install -r requirements.txt
           wget -q https://github.com/broadinstitute/cromwell/releases/download/84/cromwell-84.jar
       - name: Run tests which should pass
-        run:   python watt.py -e cromwell-84.jar -t simple compress_file expect_fail ignore_lines ignore_lines_compress -p $(nproc)
+        run:   python watt.py -e cromwell-84.jar -t simple compress_file expect_fail ignore_lines ignore_lines_compress pdfs_match pdfs_match_without_extension -p $(nproc)
       - name: Test chunking with ignored lines
         run: python watt.py -e cromwell-84.jar -w say_hello -t ignore_lines --chunk 10
       - name: Run tests which should fail
@@ -41,6 +42,14 @@ jobs:
           fi
           if python watt.py -e cromwell-84.jar -w say_hello -t ignore_lines_compress_fail; then
             echo "Test ignore_lines_compress_fail for workflow say_hello succeeded which should not have passed."
+            exit 1
+          fi
+          if python watt.py -e cromwell-84.jar -w get_pdf -t text_mismatches; then
+            echo "Test text_mismatches for workflow get_pdf succeeded which should not have passed."
+            exit 1
+          fi
+          if python watt.py -e cromwell-84.jar -w get_pdf -t figure_mismatches; then
+            echo "Test figure_mismatches for workflow get_pdf succeeded which should not have passed."
             exit 1
           fi
           if python watt.py -e cromwell-84.jar -w not_a_workflow; then

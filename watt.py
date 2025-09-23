@@ -192,6 +192,20 @@ class CompareOutputs:
                 return ComparisonResult.Mismatch
         return ComparisonResult.Match
 
+    def is_pdf_by_header(self, file_path: str) -> bool:
+        with open(file_path, 'rb') as f:
+            header = f.read(4)
+            return header == b'%PDF'
+
+    def compare_pdfs(self, file1_path: str, file2_path: str) -> int:
+        import pdf2image
+        # Convert PDF files to images
+        images1 = pdf2image.convert_from_path(file1_path)
+        images2 = pdf2image.convert_from_path(file2_path)
+        if images1 == images2:
+            return ComparisonResult.Match
+        return ComparisonResult.Mismatch
+
     def match(self, x, y, line_skip_regex_str: str = None) -> int:
         """
         Performs a comparison against two values from an output JSON. Uses recursion to handle nested Array types, and
@@ -228,6 +242,8 @@ class CompareOutputs:
                     self.download_gcs_blob_to_tmp_file(y, temp_y.name)
                     return self.match(x, temp_y.name, line_skip_regex_str)
             if os.path.exists(x) and os.path.exists(y):
+                if self.is_pdf_by_header(x) and self.is_pdf_by_header(y):
+                    return self.compare_pdfs(x, y)
                 try:
                     with gzip.open(x, 'rt') as x_file, gzip.open(y, 'rt') as y_file:
                         return self.compare_files(x_file, y_file, line_skip_regex_str)
