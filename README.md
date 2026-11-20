@@ -70,6 +70,8 @@ Othewise, each key will have its value compared to the matching key in the other
 * `-c`: location of Watt config file (default: `watt_config.yml`)
 * `-l`: location to write Watt logs (defaults to stdout)
 * `-p`: number of processes to use for testing
+* `--cromwell-config`: config file passed to Cromwell via `-Dconfig.file`
+* `--cromwell-options`: workflow options JSON passed to Cromwell via `--options` (e.g. to set `google_labels` or `final_workflow_outputs_dir`); applied to every test run
 
 ### Example Usage
 
