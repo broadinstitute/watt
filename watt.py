@@ -36,6 +36,7 @@ parser.add_argument("-l", "--log", help="Where to print test log after running. 
                     type=argparse.FileType('w'), default=sys.stdout)
 parser.add_argument("-p", "--processes", help="Number of processes to run tests concurrently.", type=int, default=1)
 parser.add_argument("--cromwell-config", help="Config file for cromwell")
+parser.add_argument("--cromwell-options", help="Workflow options JSON passed to Cromwell via --options")
 
 parser.add_argument("--chunk-size", help="Chunk size for reading files in", type=int, default=1024*1024)
 
@@ -70,17 +71,23 @@ class CromwellConfig:
     jar_path: str
     log_prefix: str
     config_path: Optional[str] = None
+    options_path: Optional[str] = None
 
     def process(self, wdl_path: str, input_json: str, output_json: str):
         if self.config_path and not os.path.exists(self.config_path):
             raise FileNotFoundError(
                 f'Cromwell config file {self.config_path} does not exist.'
             )
+        if self.options_path and not os.path.exists(self.options_path):
+            raise FileNotFoundError(
+                f'Cromwell options file {self.options_path} does not exist.'
+            )
 
         cromwell_cmd = (['java'] +
                         ([f'-Dconfig.file={self.config_path}'] if self.config_path else []) +
                         ['-jar', self.jar_path, 'run', wdl_path, '--inputs', input_json, '--metadata-output',
-                         output_json]
+                         output_json] +
+                        (['--options', self.options_path] if self.options_path else [])
                         )
 
         cromwell_process = subprocess.Popen(cromwell_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -479,7 +486,8 @@ if __name__ == '__main__':
 
     # Setup Cromwell parameters
     if args.executor is not None:
-        cromwell = CromwellConfig(jar_path=args.executor, log_prefix=args.executor_log_prefix, config_path=args.cromwell_config)
+        cromwell = CromwellConfig(jar_path=args.executor, log_prefix=args.executor_log_prefix, config_path=args.cromwell_config,
+                                  options_path=args.cromwell_options)
     else:
         raise ValueError("Must provide -e executor value.")
 

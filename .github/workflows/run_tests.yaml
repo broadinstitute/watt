@@ -4,6 +4,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Cromwell 84 hangs at startup on newer JDKs (e.g. the JDK 25 default on ubuntu-26.04)
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
       - name: Install requirements
         run: |
           sudo apt-get install poppler-utils
@@ -13,6 +18,14 @@ jobs:
         run:   python watt.py -e cromwell-84.jar -t simple compress_file expect_fail ignore_lines ignore_lines_compress pdfs_match pdfs_match_without_extension -p $(nproc)
       - name: Test chunking with ignored lines
         run: python watt.py -e cromwell-84.jar -w say_hello -t ignore_lines --chunk 10
+      - name: Test passing workflow options to Cromwell
+        run: |
+          echo "{\"final_workflow_outputs_dir\": \"$RUNNER_TEMP/final_outputs\"}" > "$RUNNER_TEMP/cromwell_options.json"
+          python watt.py -e cromwell-84.jar -w say_hello -t simple --cromwell-options "$RUNNER_TEMP/cromwell_options.json"
+          if ! find "$RUNNER_TEMP/final_outputs" -name announcement.txt | grep -q .; then
+            echo "Workflow options were not applied: announcement.txt not copied to final_workflow_outputs_dir."
+            exit 1
+          fi
       - name: Run tests which should fail
         run: |
           echo "THE FOLLOWING TESTS SHOULD ALL FAIL"
@@ -50,6 +63,10 @@ jobs:
           fi
           if python watt.py -e cromwell-84.jar -w get_pdf -t figure_mismatches; then
             echo "Test figure_mismatches for workflow get_pdf succeeded which should not have passed."
+            exit 1
+          fi
+          if python watt.py -e cromwell-84.jar -w say_hello -t simple --cromwell-options not_a_file.json; then
+            echo "Test specifying non existent Cromwell options file succeeded which should have raised exception."
             exit 1
           fi
           if python watt.py -e cromwell-84.jar -w not_a_workflow; then
